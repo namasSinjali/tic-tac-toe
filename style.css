@@ -1,0 +1,93 @@
+*, *::before, *::after{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    display: grid;
+    justify-content: center;
+    align-content: space-evenly;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+}
+.gameboard{
+    display: grid;
+    grid-template-rows: repeat(3, 100px);
+    grid-template-columns: repeat(3, 100px);
+    justify-content: center;
+    align-content: center;
+    background-color: black;
+    grid-gap: 4px;
+}
+
+.cell{
+    background-color: white;
+    background-size: contain;
+    cursor: pointer;
+}
+.cell.x, .cell.o {
+    cursor: not-allowed;
+}
+.cell::before{
+    display: block;
+    background-size: contain;
+    content: "";
+    width: 100%;
+    height: 100%;
+}
+
+.cell.x::before{
+    background-image: url(./icons/cross.svg);
+}
+.cell.o::before{
+    background-image: url(./icons/circle.svg);
+}
+
+.gameboard.x .cell:not(.x):not(.o):hover::before{
+    background-image: url(./icons/cross.svg);
+    opacity: .4;
+}
+.gameboard.o .cell:not(.x):not(.o):hover::before{
+    background-image: url(./icons/circle.svg);
+    opacity: .4;
+}
+.buttons{
+    display: flex;
+    justify-content: space-between;
+}
+button{
+    border: none;
+    outline: none;
+    background: black;
+    color: white;
+    font-size: 1.5rem;
+    padding: .5rem 1rem;
+    border-radius: 1rem;
+    cursor: pointer;
+}
+button:hover{
+    background: white;
+    color: black;
+}
+.screen{
+    display: flex;
+    flex-flow:column nowrap;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background-color: #000000aa;
+}
+.message-screen{
+    display: none;
+}
+.message-screen h1{
+    color: white;
+    font-size: 5rem;
+    font-weight: bold;
+    margin-bottom: .5em;
+}
