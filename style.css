@@ -93,6 +93,7 @@ button:hover{
     margin-bottom: .5em;
 }
 
-.settings-screen{
-
+.settings-screen h1 svg{
+    width: 4rem;
+    height: 4rem;
 }
