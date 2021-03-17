@@ -81,6 +81,7 @@ button:hover{
     right: 0;
     left: 0;
     background-color: #000000aa;
+    color: white;
 }
 .message-screen{
     display: none;
@@ -90,4 +91,8 @@ button:hover{
     font-size: 5rem;
     font-weight: bold;
     margin-bottom: .5em;
+}
+
+.settings-screen{
+
 }
