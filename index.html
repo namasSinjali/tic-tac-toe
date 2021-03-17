@@ -7,10 +7,23 @@
     <link rel="stylesheet" href="style.css">
     <title>Tic-Tac-Toe</title>
 </head>
-<body>
+<body class="x">
+    <button id="restart-btn">Restart</button>
+    <button id="settings-btn">Settings</button>
+    <header>
+        <div class="player x">
+            <img src="./icons/cross.svg">
+            <span>Human</span>
+        </div>
+        <span>vs</span>
+        <div class="player o">
+            <img src="./icons/circle.svg">
+            <span>Human</span>
+        </div>
+    </header>
     <div class="gameboard o">
-        <div class="cell x"></div>
-        <div class="cell o"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
         <div class="cell"></div>
         <div class="cell"></div>
         <div class="cell"></div>
@@ -21,13 +34,13 @@
     </div>
     </div>
     <div class="buttons">
-        <button class="restart">Restart</button>
-        <button class="settings">Settings</button>
+        <label for="restart-btn" class="button restart">Restart</label>
+        <label for="settings-btn" class="button settings">Settings</label>
     </div>
 
     <div class="screen message-screen">
         <h1>X's win</h1>
-        <button class="restart">Restart</button>
+        <label for="restart-btn" class="button restart">Restart</label>
     </div>
 
     <div class="screen settings-screen">
@@ -50,7 +63,7 @@
 
             <div class="selector name">
                 <h2>Name: </h2>
-                <input type="text">
+                <input type="text" maxlength="8">
             </div>
 
             <div class="selector level">
@@ -92,7 +105,7 @@
 
             <div class="selector name">
                 <h2>Name: </h2>
-                <input type="text">
+                <input type="text" maxlength="8">
             </div>
             
             <div class="selector level">
@@ -113,7 +126,7 @@
             
         </div>
 
-        <button class="restart">Restart</button>
+        <label for="restart-btn" class="button restart">Restart</label>
     </div>
     <script src="sctipt.js"></script>
 </body>
