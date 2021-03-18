@@ -147,7 +147,7 @@ body.message .message-screen, body.settings .settings-screen{
     flex-flow: column nowrap;
     justify-content: space-evenly;
     flex: 2rem 0 0;
-    min-width: 20rem;
+    min-width: 26rem;
 }
 .settings-screen h1{
     margin: -1rem 0 0 -1rem;

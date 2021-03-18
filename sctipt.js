@@ -11,11 +11,13 @@ const ELEMS = {
     
     playersSettings: {
         x: {
+            self: document.querySelector(".settings-screen .x"),
             type: document.querySelectorAll('input[name="x-type"'),
             name: document.querySelector('input[name="x-name"'),
             level: document.querySelectorAll('input[name="x-level"'),
         },
         o: {
+            self: document.querySelector(".settings-screen .o"),
             type: document.querySelectorAll('input[name="o-type"'),
             name: document.querySelector('input[name="o-name"'),
             level: document.querySelectorAll('input[name="o-level"'),
@@ -30,6 +32,20 @@ ELEMS.restartBtn.addEventListener("click", function restart(){
 ELEMS.settingsBtn.addEventListener("click", function displaySettings(e){
     ELEMS.body.classList.add("settings")
 })
+{
+    let a = ["x", "o"]
+    a.forEach(x=>{
+        ELEMS.playersSettings[x]["type"][0].addEventListener("change", function displayNameInput(){
+            ELEMS.playersSettings[x].self.classList.remove("computer");
+            ELEMS.playersSettings[x].self.classList.add("human");
+        })
+
+        ELEMS.playersSettings[x]["type"][1].addEventListener("change", function displayNameInput(){
+            ELEMS.playersSettings[x].self.classList.remove("human");
+            ELEMS.playersSettings[x].self.classList.add("computer");
+        })
+    })
+}
 
 var thisGame = newGame();
 
@@ -41,12 +57,13 @@ function newGame(){
 
     resetGameboard();
 
-    let boardStatus = [
+    let boardInfo={};
+    boardInfo.cellStatus = [
         null, null, null,
         null, null, null,
         null, null, null,
     ];
-    let emptyCells = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    boardInfo.emptyCells = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
     let currPlayer = "x";//  Player with current turn
     let playersInfo={
@@ -60,6 +77,7 @@ function newGame(){
                 playerType = e.value;
             }
         })
+        playersInfo[i]["type"] = playerType;
 
         if(playerType === "human"){
             playersInfo[i]["name"] = ELEMS.playersSettings[i]["name"].value || "Human"
@@ -72,30 +90,44 @@ function newGame(){
             })
             playersInfo[i]["level"] = playerLevel;
             playersInfo[i]["name"] = playerLevel;
+
+            playersInfo[i]["algorithm"] = getAlgorithm(playerLevel, i);
         }
     }
 
     ELEMS.nameDisplay.x.innerText = playersInfo.x.name;
     ELEMS.nameDisplay.o.innerText = playersInfo.o.name;
 
-    return {play};
+    if(playersInfo[currPlayer].type === "computer"){
+        setTimeout(playersInfo[currPlayer].algorithm);
+    }
 
-    function play(cellNo){
-        if(boardStatus[cellNo]){
+    return {play, getBoardInfo};
+
+    function getBoardInfo(){return boardInfo}
+
+    function play(cellNo, playerType = "human"){
+        if(boardInfo.cellStatus[cellNo] || playerType !== playersInfo[currPlayer]["type"]){
             return;
         }
 
-        boardStatus[cellNo] = currPlayer;
-        emptyCells = emptyCells.filter(e=>e!==cellNo);
+        boardInfo.cellStatus[cellNo] = currPlayer;
+        boardInfo.emptyCells = boardInfo.emptyCells.filter(e=>e!==cellNo);
         ELEMS.cells[cellNo].classList.add(currPlayer);
 
-        if(checkForWin(boardStatus, currPlayer)){
-            displayMessage(`${currPlayer.toUpperCase()}'s Win`)
-        }else if(emptyCells.length === 0){
+        if(checkForWin(boardInfo.cellStatus, currPlayer)){
+            displayMessage(`${currPlayer.toUpperCase()}'s Win`);
+            return
+        }else if(boardInfo.emptyCells.length === 0){
             displayMessage("Draw");
+            return
         }
 
         changePlayer();
+
+        if(playersInfo[currPlayer].type === "computer"){
+            setTimeout(playersInfo[currPlayer].algorithm);
+        }
     }
     function changePlayer(){
         ELEMS.body.classList.remove(currPlayer);
@@ -110,24 +142,108 @@ function resetGameboard(){
         ELEMS.cells[i].className = "cell";
         ELEMS.cells[i].addEventListener("click", function cellClicked(){
             thisGame.play(i);
-        }, {once: true})
+        })
     }
 }
-function checkForWin(boardStatus, player = null){
+function checkForWin(cellStatus, player = null){
     const winComb = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8],// rows
         [0, 3, 6], [1, 4, 7], [2, 5, 8],// columns
         [0, 4, 8], [2, 4, 6]// diagonals
     ]
     if(player){
-        return winComb.some(arr=>arr.every(e=>boardStatus[e]===player));
-    } else if(checkForWin(boardStatus, "x")) {
+        return winComb.some(arr=>arr.every(e=>cellStatus[e]===player));
+    } else if(checkForWin(cellStatus, "x")) {
         return true;
     } else {
-        return checkForWin(boardStatus, "o");
+        return checkForWin(cellStatus, "o");
     }
 }
 function displayMessage(message){
     ELEMS.messageBox.innerText = message;
     ELEMS.body.classList.add("message");
+}
+
+function getAlgorithm(level, player){
+    let boardInfo;
+    let playLocation;
+    const ALGORITHMS = {
+        easy: function(){
+            boardInfo = thisGame.getBoardInfo();
+            playLocation = chooseRandomEmptyCell();
+            play(playLocation);
+        },
+        medium: function(){
+            boardInfo = thisGame.getBoardInfo();
+            playLocation = chooseRandomEmptyCell();
+            
+            let cellStatus = [...boardInfo.cellStatus];
+            let emptyCells = [...boardInfo.emptyCells];
+            let len = emptyCells.length;
+
+            let nextPlayer = player === "x"? "o": "x";
+            for(let i = 0; i < len; i++){
+                let index = emptyCells[i];
+
+                cellStatus[index] = player;
+                if(checkForWin(cellStatus, player)){
+                    playLocation = index;
+                    break;
+                }
+
+                cellStatus[index] = nextPlayer;
+                if(checkForWin(cellStatus, nextPlayer)){
+                    playLocation = index;
+                }
+
+                cellStatus[index] = null;
+            }
+
+            play(playLocation);
+        },
+        hard: function(){
+            boardInfo = thisGame.getBoardInfo();
+
+            playLocation = bestMove(boardInfo, player)[0];
+
+            play(playLocation);
+        }
+
+    }
+    return ALGORITHMS[level];
+    function chooseRandomEmptyCell(){
+        let len = boardInfo.emptyCells.length;
+        let rnd = Math.floor(Math.random()*len);
+        return boardInfo.emptyCells[rnd]
+    }
+    function play(location){
+        setTimeout(function(){thisGame.play(location, "computer")}, 1000)
+    }
+    function bestMove({cellStatus:[...cellStatus], emptyCells:[...emptyCells]}, player, depth = 0){
+        let returnArr = [null, -Infinity];
+        let nextPlayer = player==="x" ? "o" : "x"
+    
+        let len = emptyCells.length;
+        for(let i=0; i<len; i++){
+            let index = emptyCells.splice(i, 1)[0];
+            cellStatus[index] = player;
+    
+            if(checkForWin(cellStatus, player)){
+                return [index, 10-depth];
+            } else if(len === 1){
+                return [index, 0];
+            } else {
+                let value = -bestMove({cellStatus, emptyCells}, nextPlayer, depth+1)[1];
+    
+                if(value > returnArr[1] || (value === returnArr[1] && Math.random()>0.5)){
+                    returnArr = [index, value];
+                }
+            }
+    
+            cellStatus[index] = null;
+            emptyCells.splice(i, 0, index);
+        }
+        
+        return returnArr;
+    }
 }
